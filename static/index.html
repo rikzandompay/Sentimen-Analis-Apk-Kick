@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Sentimen Ulasan Kick: NB vs Linear SVM</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/source-serif-4-opsz.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="tema.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="lompat" href="#coba">Langsung ke demo model</a>
+
+  <div id="banner" class="banner" role="status" hidden>
+    <span id="banner-teks"></span>
+    <button id="banner-ulang" class="tombol kecil" type="button" hidden>Coba lagi</button>
+  </div>
+
+  <div class="halaman">
+    <nav class="kepala-situs" aria-label="Bagian halaman">
+      <span class="nama-situs">Dashboard hasil penelitian</span>
+      <ul class="nav">
+        <li><a href="#data"><span class="nav-no">1</span>Data</a></li>
+        <li><a href="#kinerja"><span class="nav-no">2</span>Kinerja</a></li>
+        <li><a href="#uji"><span class="nav-no">3</span>Uji</a></li>
+        <li><a href="#coba"><span class="nav-no">4</span>Coba model</a></li>
+      </ul>
+      <button id="tombol-tema" class="tombol-tema" type="button">Mode gelap</button>
+    </nav>
+
+    <main>
+      <!-- 1. Header -->
+      <header class="judul">
+        <h1>Analisis Sentimen Ulasan Aplikasi Kick di Play Store: Perbandingan Naïve Bayes dan Linear SVM</h1>
+        <p class="deck">Ulasan KICK: Live Streaming, Google Play Store (Indonesia)</p>
+      </header>
+
+      <!-- 2. Ringkasan KPI -->
+      <section class="ringkasan" aria-label="Ringkasan hasil">
+        <div class="kpi">
+          <p class="kpi-label">
+            <span>Dataset</span>
+            <button class="info" type="button" id="info-dataset" data-tip="" aria-label="Keterangan dataset">i</button>
+          </p>
+          <p class="kpi-nilai" id="kpi-berteks">–</p>
+          <p class="kpi-sub" id="kpi-bersih">ulasan berteks</p>
+          <p class="kpi-ket" id="kpi-tanggal"></p>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">Data latih dan uji</p>
+          <p class="kpi-nilai" id="kpi-split">–</p>
+          <p class="kpi-sub">ulasan latih / uji</p>
+          <p class="kpi-ket" id="kpi-rasio"></p>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">Algoritma diuji</p>
+          <p class="kpi-nilai" id="kpi-algoritma">–</p>
+          <p class="kpi-sub" id="kpi-algoritma-nama"></p>
+        </div>
+        <div class="kpi kpi-terbaik">
+          <p class="kpi-label">Model terbaik</p>
+          <p class="kpi-nilai"><span id="kpi-terbaik-nilai">–</span> <span class="kpi-model" id="kpi-terbaik-model"></span></p>
+          <p class="kpi-sub">akurasi nested 5-fold CV tertinggi</p>
+          <p class="kpi-ket" id="kpi-terbaik-mcnemar"></p>
+        </div>
+      </section>
+
+      <!-- 3. Data dan distribusi kelas -->
+      <section class="bagian" id="data" aria-labelledby="judul-data">
+        <h2 class="judul-bagian" id="judul-data"><span class="no">1</span>Data dan penyeimbangan kelas</h2>
+        <div class="dua-kolom">
+          <figure class="figur">
+            <div class="distribusi">
+              <div id="grafik-distribusi" class="grafik-distribusi"></div>
+              <dl class="ringkas" id="ringkas-distribusi"></dl>
+            </div>
+            <figcaption><b>Gambar 1.</b> <span id="cap-gambar-1">Distribusi kelas sentimen.</span>
+              Label berasal dari rating bintang (skor 1–2 negatif, 4–5 positif, skor 3 dikeluarkan).</figcaption>
+          </figure>
+
+          <figure class="figur">
+            <table class="tabel tabel-ros" id="tabel-ros">
+              <thead>
+                <tr>
+                  <th scope="col" class="kiri">Data latih</th>
+                  <th scope="col"><span class="swatch swatch-pos" aria-hidden="true"></span>Positif</th>
+                  <th scope="col"><span class="swatch swatch-neg" aria-hidden="true"></span>Negatif</th>
+                  <th scope="col">Total</th>
+                  <th scope="col" class="kolom-batang"><span class="sr-only">Proporsi</span></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <figcaption><b>Gambar 2.</b> <span id="cap-gambar-2">Data latih sebelum dan sesudah RandomOverSampler.</span>
+              Oversampling hanya pada data latih; data uji tetap berdistribusi asli<span id="cap-gambar-2-uji"></span>.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 4. Benchmark -->
+      <section class="bagian" id="kinerja" aria-labelledby="judul-kinerja">
+        <h2 class="judul-bagian" id="judul-kinerja"><span class="no">2</span>Kinerja model</h2>
+        <p class="keterangan-tabel"><b>Tabel 1.</b> <span id="cap-tabel-1">Akurasi dan Macro-F1 kedua model.</span>
+          Nilai tertinggi tiap kolom dicetak tebal.</p>
+        <p class="petunjuk-geser">Geser tabel ke samping untuk melihat semua kolom.</p>
+        <div class="tabel-bungkus" tabindex="0" role="region" aria-label="Tabel 1, dapat digeser ke samping">
+          <table class="tabel tabel-benchmark" id="tabel-benchmark">
+            <thead>
+              <tr class="grup">
+                <th scope="col" rowspan="2" class="kiri">Model</th>
+                <th scope="col" rowspan="2" class="kiri">Hyperparameter</th>
+                <th scope="colgroup" colspan="2" id="kepala-single">Single split</th>
+                <th scope="colgroup" colspan="2">Nested 5-fold CV</th>
+              </tr>
+              <tr>
+                <th scope="col">Akurasi</th>
+                <th scope="col">Macro-F1</th>
+                <th scope="col">Akurasi (rata-rata ± SD)</th>
+                <th scope="col">Macro-F1 (rata-rata)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="catatan-tabel" id="catatan-tabel-1"></p>
+
+        <figure class="figur figur-cm">
+          <div class="grid-cm" id="grid-cm"></div>
+          <figcaption><b>Gambar 3.</b> <span id="cap-gambar-3">Confusion matrix pada data uji.</span>
+            Baris adalah kelas aktual, kolom adalah kelas prediksi; warna makin pekat berarti jumlah makin besar.</figcaption>
+        </figure>
+      </section>
+
+      <!-- 5. Ablasi dan McNemar -->
+      <section class="bagian" id="uji" aria-labelledby="judul-uji">
+        <h2 class="judul-bagian" id="judul-uji"><span class="no">3</span>Uji signifikansi dan ablasi</h2>
+        <div class="kolom-uji">
+          <div>
+            <p class="keterangan-tabel"><b>Tabel 2.</b> Ablasi oversampling.
+              <span class="label-metode">5-fold CV biasa, bukan nested; hanya deskriptif</span></p>
+            <div class="tabel-bungkus">
+              <table class="tabel tabel-ablasi" id="tabel-ablasi">
+                <thead>
+                  <tr>
+                    <th scope="col" class="kiri">Model</th>
+                    <th scope="col" class="kiri">Kondisi</th>
+                    <th scope="col">Akurasi</th>
+                    <th scope="col">Macro-F1</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="catatan-tabel" id="ket-ablasi"></p>
+          </div>
+
+          <aside class="mcnemar" aria-labelledby="judul-mcnemar">
+            <h3 id="judul-mcnemar">Uji McNemar eksak</h3>
+            <p class="mcnemar-ket" id="ket-mcnemar"></p>
+            <p class="mcnemar-p"><span class="mcnemar-p-label">p-value</span>
+              <span class="mcnemar-p-nilai" id="mcnemar-p">–</span></p>
+            <p id="mcnemar-status"></p>
+            <dl class="mcnemar-bc">
+              <div><dt>b · NB benar, SVM salah</dt><dd id="mcnemar-b">–</dd></div>
+              <div><dt>c · NB salah, SVM benar</dt><dd id="mcnemar-c">–</dd></div>
+            </dl>
+            <p class="tafsir" id="mcnemar-tafsir"></p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 6. Playground dan hasil -->
+      <section class="bagian" id="coba" aria-labelledby="judul-coba">
+        <h2 class="judul-bagian" id="judul-coba"><span class="no">4</span>Coba model</h2>
+        <p class="pengantar">Prediksi satu ulasan dengan model yang sama persis dengan hasil di atas. Teks tidak disimpan.</p>
+        <div class="kolom-demo">
+          <div class="panel">
+            <form id="form-prediksi" novalidate>
+              <fieldset class="pilih-model">
+                <legend>Model</legend>
+                <div class="segmen">
+                  <input type="radio" name="model" id="model-nb" value="nb" checked>
+                  <label for="model-nb">Multinomial NB</label>
+                  <input type="radio" name="model" id="model-svm" value="svm">
+                  <label for="model-svm">Linear SVM</label>
+                </div>
+              </fieldset>
+
+              <div class="preset">
+                <span class="preset-label" id="label-preset">Contoh</span>
+                <button type="button" class="tombol kecil" data-preset="positif" aria-describedby="label-preset">Preset positif</button>
+                <button type="button" class="tombol kecil" data-preset="negatif" aria-describedby="label-preset">Preset negatif</button>
+              </div>
+
+              <div class="bidang">
+                <div class="bidang-kepala">
+                  <label for="teks-ulasan">Ulasan</label>
+                  <span class="penghitung" id="penghitung" aria-live="polite">0 / 500</span>
+                </div>
+                <textarea id="teks-ulasan" name="text" maxlength="500" rows="6"
+                  placeholder="Contoh: streaming lancar, tapi sering logout sendiri"></textarea>
+                <p class="petunjuk">Ctrl + Enter untuk memprediksi.</p>
+              </div>
+
+              <div class="aksi">
+                <button type="button" class="tombol" id="tombol-bersihkan">Bersihkan</button>
+                <button type="button" class="tombol" id="tombol-bandingkan" disabled>Bandingkan NB &amp; SVM</button>
+                <button type="submit" class="tombol utama" id="tombol-prediksi" disabled>Prediksi</button>
+              </div>
+            </form>
+            <p class="batasan">Batasan: label latih berasal dari rating bintang, sehingga ulasan berbintang tinggi yang
+              berisi keluhan (atau sebaliknya) bisa diprediksi keliru.</p>
+          </div>
+
+          <div class="panel panel-hasil" aria-labelledby="judul-hasil">
+            <h3 id="judul-hasil" class="judul-panel">Hasil prediksi</h3>
+            <div id="hasil" aria-live="polite">
+              <div class="kosong" id="hasil-kosong">
+                <p>Belum ada prediksi.</p>
+                <p>Pilih model, tulis ulasan atau pakai preset, lalu tekan <strong>Prediksi</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="kolofon" id="kolofon"></footer>
+  </div>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+</body>
+</html>

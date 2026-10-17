@@ -1,0 +1,18 @@
+# Versi dikunci. Empat baris pertama harus sama dengan metrics.json["versi"] / run Colab,
+# karena berkas .joblib hanya terbaca dengan versi scikit-learn yang sama.
+scikit-learn==1.6.1
+imbalanced-learn==0.14.2
+nltk==3.9.1
+Sastrawi==1.0.1
+
+# Dipakai build_artifacts.py (alur notebook); versi sezaman dengan scikit-learn 1.6.1
+numpy==2.2.6
+scipy==1.15.3
+pandas==2.3.3
+matplotlib==3.10.7
+seaborn==0.13.2
+joblib==1.5.2
+
+# Server dashboard
+fastapi==0.143.3
+uvicorn==0.54.0

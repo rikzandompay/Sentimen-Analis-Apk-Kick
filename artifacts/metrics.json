@@ -1,0 +1,110 @@
+{
+  "versi": {
+    "preprocessing": "v5",
+    "python": "3.13.16",
+    "scikit-learn": "1.6.1",
+    "imbalanced-learn": "0.14.2"
+  },
+  "data": {
+    "tanggal_scraping": "2026-10-17",
+    "batas_ulasan": null,
+    "berteks": 1125,
+    "setelah_dedup": 1087,
+    "distribusi_label": {
+      "Positif": 771,
+      "Negatif": 261,
+      "Netral": 55
+    },
+    "akhir": 1024,
+    "distribusi_akhir": {
+      "Positif": 763,
+      "Negatif": 261
+    },
+    "latih": {
+      "Positif": 534,
+      "Negatif": 182
+    },
+    "uji": {
+      "Positif": 229,
+      "Negatif": 79
+    },
+    "latih_setelah_ros": {
+      "Positif": 534,
+      "Negatif": 453
+    },
+    "jumlah_fitur": 1226
+  },
+  "model": {
+    "nb": {
+      "alpha": 1.0,
+      "single_split": {
+        "akurasi": 0.8733766233766234,
+        "macro_f1": 0.8443537414965987,
+        "cm": {
+          "tn": 68,
+          "fp": 11,
+          "fn": 28,
+          "tp": 201
+        }
+      },
+      "nested_cv": {
+        "akurasi_mean": 0.9130798660927786,
+        "akurasi_std": 0.013275189930827262,
+        "macro_f1_mean": 0.8877141073798025,
+        "macro_f1_std": 0.018313144785885284
+      }
+    },
+    "svm": {
+      "C": 0.1,
+      "single_split": {
+        "akurasi": 0.8701298701298701,
+        "macro_f1": 0.8363095238095237,
+        "cm": {
+          "tn": 64,
+          "fp": 15,
+          "fn": 25,
+          "tp": 204
+        }
+      },
+      "nested_cv": {
+        "akurasi_mean": 0.9072357723577236,
+        "akurasi_std": 0.00863627429261105,
+        "macro_f1_mean": 0.8791873900566362,
+        "macro_f1_std": 0.01164966556882563
+      }
+    }
+  },
+  "mcnemar": {
+    "b": 6,
+    "c": 5,
+    "p_value": 1.0,
+    "alpha": 0.05,
+    "signifikan": false
+  },
+  "ablasi": [
+    {
+      "Model": "Naïve Bayes",
+      "Oversampling": "Tanpa ROS",
+      "Akurasi (CV)": 0.8798947871831659,
+      "Macro-F1 (CV)": 0.8195457463413527
+    },
+    {
+      "Model": "Naïve Bayes",
+      "Oversampling": "Dengan ROS",
+      "Akurasi (CV)": 0.9160210425633668,
+      "Macro-F1 (CV)": 0.8916352609362528
+    },
+    {
+      "Model": "SVM (Linear)",
+      "Oversampling": "Tanpa ROS",
+      "Akurasi (CV)": 0.8916260162601626,
+      "Macro-F1 (CV)": 0.8442815177856252
+    },
+    {
+      "Model": "SVM (Linear)",
+      "Oversampling": "Dengan ROS",
+      "Akurasi (CV)": 0.9072357723577236,
+      "Macro-F1 (CV)": 0.8791873900566362
+    }
+  ]
+}
